@@ -8,19 +8,16 @@ import sklearn.preprocessing
 import sklearn.random_projection
 import sklearn.neighbors
 from sklearn.metrics import precision_score
-from sklearn.metrics import roc_auc_score, average_precision_score
-from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
 
 
 # define patterns
 n = 5
-profit_taking = 0.0035
-p = 0.75
-
+profit_taking = 0.0025
+p = 0.70
 
 #READ IN DATA
 df_original = pd.read_csv("data/final_clean_FX_data.csv")
-
 
 #feature engineer
 df_original = df_original.sort_values(by =  "Date", ascending=True)
@@ -69,10 +66,10 @@ df = df.dropna()
 df = df.drop(columns=['c_over_o', 'h_over_o', 'l_over_o', 'range'])
 
 
-# make splits
-train_df   = df[(df['Date'] >= '2007-01-01') & (df['Date'] < '2017-01-01')]
-val_df   = df[(df['Date'] >= '2017-01-01') & (df['Date'] < '2020-01-01')]
-test_df  = df[df['Date'] >= '2020-01-01']
+
+train_df   = df[(df['Date'] >= '2017-01-01') & (df['Date'] < '2020-01-01')]
+val_df   = df[(df['Date'] >= '2020-01-01') & (df['Date'] < '2022-01-01')]
+test_df  = df[df['Date'] >= '2022-01-01']
 
 x_train = train_df.drop(columns=['target', 'Date', 'Close', 'Open', 'High', 'Low'])
 y_train = train_df['target']
@@ -83,9 +80,7 @@ y_val = val_df['target']
 x_test = test_df.drop(columns=['target', 'Date', 'Close', 'Open', 'High', 'Low'])
 y_test = test_df['target']
 
-
-
-#scale data
+# Scaling the data
 
 standardize = StandardScaler(with_mean=True, with_std=True)
 standardize.fit(x_train)
@@ -105,50 +100,30 @@ x_test = pd.DataFrame(
     index=x_test.index
 )
 
-# pca
-pca = sklearn.decomposition.PCA(n_components=10)
-pca.fit(x_train)
-x_train = pca.transform(x_train)
-x_test = pca.transform(x_test)
-x_val = pca.transform(x_val)
 
 
-print(x_train.shape)
-print(x_val.shape)
-print(x_test.shape)
-print(y_train.value_counts(normalize=True))
-print(y_val.value_counts(normalize=True))
-print(y_test.value_counts(normalize=True))
-
-
-# MODEL TRAINING
 model1 = MLPClassifier(
-    hidden_layer_sizes=(16,),   
+    hidden_layer_sizes=[16, 16],
     activation="relu",
-    alpha=0.01,                
-    max_iter=2000,
-    random_state=42
+    alpha=0.001,
+    max_iter=1000,
+    random_state = 42
 )
 
 model1.fit(x_train, y_train)
 
 validation_accuracy = model1.score(x_val, y_val)
-print(f"validation_accuracy={validation_accuracy:0.4f}")
+print(f"validation_accuracy1={validation_accuracy:0.4f}")
 train_accuracy = model1.score(x_train, y_train)
-print(f"train_accuracy={train_accuracy:0.4f}")
-y_pred = model1.predict(x_train)
+print(f"train_accuracy1={train_accuracy:0.4f}")
 
-print("training")
-print(classification_report(y_train, y_pred))
-
-y_pred_val = model1.predict(x_val)
-print("validation")
-print(classification_report(y_val, y_pred_val))
-
-if False:
-    model1.fit(x_train, y_train)
+if True:
     test_accuracy = model1.score(x_test, y_test)
     print(f"test_accuracy={test_accuracy}")
+
+    y_true = y_test.values.ravel()
+    probs_test = model1.predict_proba(x_test)[:, 1]
+    preds_test = model1.predict(x_test)
 
 
 #eval NN
@@ -156,12 +131,10 @@ if False:
 ## cleaning data
 X_test = test_df.drop(columns=["target", "Date", "Close", "Open", "High", "Low"])
 y_test = test_df["target"]
-X_test = standardize.transform(X_test)
-X_test = pca.transform(X_test)
-
+X_test_scaled = standardize.transform(X_test)
 
 ## probabilities
-probs = model1.predict_proba(X_test)[:, 1]
+probs = model1.predict_proba(X_test_scaled)[:, 1]
 
 # probability distribution
 print("Probability summary:")
@@ -260,10 +233,4 @@ print(f"Final equity (enter every day): {base_final_equity:.3f}")
 
 relative_performance = model_final_equity / base_final_equity
 print(f"Relative performance (model / baseline): {relative_performance:.3f}x")
-
-
-
-
-
-
 
