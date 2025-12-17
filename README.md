@@ -1,12 +1,8 @@
-## Attempt #1:
+## Overview
 
-current optimal for Neural Network:
-n = 5
-profit_taking = 0.0035
-p = 0.65
+The objective of this project was to design, implement, and compare trading algorithms using both traditional time-series techniques and modern machine learning methods for the EUR/GBP exchange rate. The first method employed an exponential smoothing trend-following strategy. This strategy aimed to identify optimal $\alpha$ and $\beta$, develop effective trading rules, and evaluate their predictive performance.
 
-Finding balance between model accuracy and true income-based performance. Making profit taking super low caused too drastic class imbalance and forced model to be overly confident, making it extremely hard for the model to learn real signals and beat a baseline.
+The second strategy implemented a neural-network-based machine learning approach to identify profitable profit-taking opportunities. The goal of this strategy was to determine an optimal profit-taking value, an optimal probability threshold, and the number of historical days the model should learn from.
 
-Increasing profit_taking to true monetary values helped distinguish the model from baseline, along with yield true profitable insights. 
-
-Dealing a lot with raw model accuracy and model confidence/relevant application. For example, don't expect the model to have high accuracy, but should still tune to not overfit since its probability plays a big role in true monetary outcomes.
+The goal of this project was not only to evaluate whether these strategies
+were profitable, but also to assess their performance and limitations. This report will explore both techniques, outlining methodology, modeling, analysis, interpretation, and limitations.
