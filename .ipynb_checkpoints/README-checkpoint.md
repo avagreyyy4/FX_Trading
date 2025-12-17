@@ -1,6 +1,6 @@
 ## Attempt #1:
 
-current optimal
+current optimal for Neural Network:
 n = 5
 profit_taking = 0.0035
 p = 0.65
